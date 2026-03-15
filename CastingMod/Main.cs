@@ -52,10 +52,12 @@ namespace vynscastingmod
                 camera.fieldOfView = 90;
                 camera.nearClipPlane = 0.01f;
                 camera.farClipPlane = 2500;
+                camera.depth = 0;
                 
-                Application.targetFrameRate = int.MaxValue; // Gtag's fps is capped at 144 by default - no thanks.
                 initialized = true;
             }
+            
+            Application.targetFrameRate = int.MaxValue; // Gtag's fps is capped at 144 by default - no thanks.
 
             HandleLoadedRigs();
             HandleTargetSwitching();
@@ -141,16 +143,15 @@ namespace vynscastingmod
 
         private void HandleCameraMovement()
         {
-            Transform targetTransform = headLock ? target.headConstraint : target.transform;
+            Transform targetTransform = headLock ? target.head.rigTarget : target.transform;
             Transform cameraTransform = camera.transform;
-            Vector3 upTemp = headLock ? targetTransform.up : Vector3.up;
             
             Vector3 targetPosition = targetTransform.position;
-            targetPosition += upTemp * yOffset;
+            targetPosition += targetTransform.up * yOffset;
             targetPosition += targetTransform.right * xOffset;
             targetPosition += targetTransform.forward * zOffset;
             
-            Quaternion targetRotation = headLock ? targetTransform.rotation : Quaternion.LookRotation(cameraTransform.forward, targetTransform.position-cameraTransform.position);
+            Quaternion targetRotation = headLock ? targetTransform.rotation : Quaternion.LookRotation(targetTransform.position-cameraTransform.position);
             
             float lerpDelta = Time.deltaTime * 120; //always gonna have 120fps-like lerping
             
@@ -160,15 +161,14 @@ namespace vynscastingmod
 
         public void OnGUI()
         {
-            if (!initialized) return;
             if (!isUiOpen) return;
 
-            if (!PhotonNetwork.InRoom)
-            {
-                roomToJoin = GUI.TextField(new Rect(5, 5, 200, 30), roomToJoin, 16).ToUpper();
-                if(GUI.Button(new Rect(5, 40, 200, 30), "Join Room")) PhotonNetworkController.Instance.AttemptToAutoJoinSpecificRoom(roomToJoin, JoinType.Solo);
-                return;
-            }
+            roomToJoin = GUI.TextField(new Rect(5, 5, 200, 30), roomToJoin).ToUpper();
+            
+            if(PhotonNetwork.InRoom)    
+                if(GUI.Button(new Rect(5, 40, 200, 30), "Leave Room")) PhotonNetwork.Disconnect();
+            else
+                if(GUI.Button(new Rect(5, 40, 200, 30), "Join Room")) PhotonNetworkController.Instance.AttemptToJoinSpecificRoom(roomToJoin, JoinType.Solo);
 
             string bindings = "ESC -> Toggle UI (this)\n\n";
             
