@@ -257,6 +257,17 @@ namespace vynscastingmod
             if(overlayX > Screen.width-267) overlayX = Screen.width-267;
             if(overlayY < 90) overlayY = 90;
             if (overlayY > Screen.height - 90) overlayY = Screen.height - 90;
+
+
+            if (Keyboard.current.tKey.wasPressedThisFrame) team1Score--;
+            if (Keyboard.current.yKey.wasPressedThisFrame) team1Score++;
+
+            if (Keyboard.current.gKey.wasPressedThisFrame) team2Score--;
+            if (Keyboard.current.hKey.wasPressedThisFrame) team2Score++;
+            
+            team1Score = Math.Clamp(team1Score, 0, 67);
+            team2Score = Math.Clamp(team2Score, 0, 67);
+
         }
 
         private void HandleRigModifiers()
@@ -303,6 +314,22 @@ namespace vynscastingmod
             uiNotificationText = message;
         }
 
+        private void DrawOutline(Rect position, String text, GUIStyle style){ //another horribly coded method from v2, ported with old overlays
+            style.normal.textColor = Color.black;
+            position.x--;
+            GUI.Label(position, text, style);
+            position.x +=2;
+            GUI.Label(position, text, style);
+            position.x--;
+            position.y--;
+            GUI.Label(position, text, style);
+            position.y +=2;
+            GUI.Label(position, text, style);
+            position.y--;
+            style.normal.textColor = Color.white;
+            GUI.Label(position, text, style);
+        }
+
         private void RenderOverlays()
         {
             int centerX = Screen.width / 2; // useful for overlays and other thingies like idk
@@ -337,17 +364,46 @@ namespace vynscastingmod
                     break;
                 
             }
+            
+            
+            centeredText.fontSize = 32;
+            centeredText.alignment = TextAnchor.MiddleLeft;
+            DrawOutline(new Rect(meow-175, Screen.height-98, 173, 50), $"{team1Name}", centeredText);
+            
+            
+            
+            centeredText.fontSize = 48;
+            DrawOutline(new Rect(meow-225, Screen.height-88, 225, 50), $"{team1Score}", centeredText);
+            
+            
+            
+            centeredText.fontSize = 32;
+            centeredText.alignment = TextAnchor.MiddleRight;
+            DrawOutline(new Rect(meow, Screen.height-98, 175, 50), $"{team2Name}", centeredText);
+            
+            
+            centeredText.fontSize = 48;
+            DrawOutline(new Rect(meow, Screen.height-88, 225, 50), $"{team2Score}", centeredText);
+            
+            centeredText.alignment = TextAnchor.UpperCenter;
+            centeredText.fontSize = 18;
         }
-        
+
         public void OnGUI()
         {
             if (!initialized) return;
 
             RenderOverlays();
-            
+
             if (!isUiOpen) return;
 
             roomToJoin = GUI.TextField(new Rect(5, 5, 200, 30), roomToJoin).ToUpper();
+            if (scoreOverlay != 0)
+            {
+                team1Name = GUI.TextField(new Rect(210, 5, 200, 30), team1Name).ToUpper();
+                team2Name = GUI.TextField(new Rect(415, 5, 200, 30), team2Name).ToUpper();
+                
+            }
 
             if (PhotonNetwork.InRoom)
             { 
@@ -392,19 +448,21 @@ namespace vynscastingmod
 
         #region Camera variables
         
-        private GUIStyle centeredText = null;
-        
+        public Camera camera;
         private List<VRRig> loadedRigs = new List<VRRig>();
         private VRRig target;
         private VRRig offlineRig;
         private bool initialized = false, isUiOpen = true;
+        
         private float uiNotificationTimer = 0;
         private string uiNotificationText = "";
         private List<TMP_FontAsset> loadedFonts = new List<TMP_FontAsset>();
-            
-        public Camera camera;
-        
         private string roomToJoin = "LUCIO";
+        private GUIStyle centeredText = null;
+        
+        private string team1Name = "TTT";
+        private string team2Name = "TSO";
+        private int team1Score = 0, team2Score = 0;
         
         
         #endregion
