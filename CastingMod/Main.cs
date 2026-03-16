@@ -103,11 +103,11 @@ namespace vynscastingmod
             }
             
             Application.targetFrameRate = int.MaxValue; // Gtag's fps is capped at 144 by default - no thanks.
-            uiNotificationTimer += Time.deltaTime; // Counts the timer up every frame in seconds - this same method of timing will be used when i add a timer overlay.
             PhotonNetworkController.Instance.disableAFKKick = true; // ensure we dont get kicked for not moving.
 
             HandleLoadedRigs();
             HandleTargetSwitching();
+            HandleTimers();
             HandleCastingBinds();
             HandleRigModifiers();
             HandleCameraMovement();
@@ -166,6 +166,29 @@ namespace vynscastingmod
             if (Keyboard.current.digit0Key.wasPressedThisFrame) setTarget(0);
         }
 
+        private void HandleTimers()
+        {
+            uiNotificationTimer += Time.deltaTime; // Counts the timer up every frame in seconds - this same method of timing will be used when i add a timer overlay.
+
+            if (isTimerRunning)
+            {
+                timeRunning += Time.deltaTime;
+            }
+
+            if (Keyboard.current.spaceKey.wasPressedThisFrame)
+            {
+                isTimerRunning = !isTimerRunning;
+                if (!isTimerRunning && timeRunning > 0) timeToBeat = timeRunning;
+                timeRunning = -10;
+            }
+
+            if (Keyboard.current.bKey.wasPressedThisFrame)
+            {
+                isTimerRunning = false;
+                timeToBeat = -10;
+                timeRunning = -10;
+            }
+        }
         private void HandleCastingBinds() // method was originally named HandleCameraOffsets, but i put perspective and other binds here too
         {
             if(Keyboard.current.escapeKey.wasPressedThisFrame) isUiOpen = !isUiOpen;
@@ -265,8 +288,8 @@ namespace vynscastingmod
             if (Keyboard.current.gKey.wasPressedThisFrame) team2Score--;
             if (Keyboard.current.hKey.wasPressedThisFrame) team2Score++;
             
-            team1Score = Math.Clamp(team1Score, 0, 67);
-            team2Score = Math.Clamp(team2Score, 0, 67);
+            team1Score = Math.Clamp(team1Score, 0, 9);
+            team2Score = Math.Clamp(team2Score, 0, 9);
 
         }
 
@@ -333,61 +356,113 @@ namespace vynscastingmod
         private void RenderOverlays()
         {
             int centerX = Screen.width / 2; // useful for overlays and other thingies like idk
-            
+
             if (centeredText == null)
             {
                 centeredText = new GUIStyle(GUI.skin.label);
-                centeredText.alignment = TextAnchor.UpperCenter;
-                centeredText.fontSize = 18;
             }
-            
+            centeredText.alignment = TextAnchor.UpperCenter;
+            centeredText.fontSize = 18;
+
             if (!uiNotificationText.IsNullOrEmpty() && uiNotificationTimer < 3) // only show notif text under 3 secs
             {
                 Color color = Color.white;
                 color.a = 1 - (uiNotificationTimer / 3);
                 centeredText.normal.textColor = color;
-                GUI.Label(new Rect(0,5, Screen.width, Screen.height-5), uiNotificationText, centeredText);
+                GUI.Label(new Rect(0, 5, Screen.width, Screen.height - 5), uiNotificationText, centeredText);
             }
-            
+
+            if (scoreOverlay == 0) return;
+
             centeredText.normal.textColor = Color.white;
-            
             int meow = overlayX;
             if (overlayX - centerX < 20 && overlayX - centerX > -20) meow = centerX;
 
             switch (scoreOverlay)
             {
                 case 1:
-                    GUI.DrawTexture(new Rect(meow-277, overlayY, 277*2, 45*2), Overlays.cgtDefault);
+                    GUI.DrawTexture(new Rect(meow - 277, overlayY, 277 * 2, 45 * 2), Overlays.cgtDefault);
                     break;
                 case 2:
-                    GUI.DrawTexture(new Rect(meow-277, overlayY, 277*2, 45*2), Overlays.cgtPink);
+                    GUI.DrawTexture(new Rect(meow - 277, overlayY, 277 * 2, 45 * 2), Overlays.cgtPink);
                     break;
-                
+
             }
-            
-            
+
+
             centeredText.fontSize = 32;
             centeredText.alignment = TextAnchor.MiddleLeft;
-            DrawOutline(new Rect(meow-175, Screen.height-98, 173, 50), $"{team1Name}", centeredText);
-            
-            
-            
+            DrawOutline(new Rect(meow - 175, overlayY + 2, 173, 50), $"{team1Name}", centeredText);
+
+
+
             centeredText.fontSize = 48;
-            DrawOutline(new Rect(meow-225, Screen.height-88, 225, 50), $"{team1Score}", centeredText);
+            DrawOutline(new Rect(meow - 225, overlayY + 12, 225, 50), $"{team1Score}", centeredText);
             
             
             
             centeredText.fontSize = 32;
             centeredText.alignment = TextAnchor.MiddleRight;
-            DrawOutline(new Rect(meow, Screen.height-98, 175, 50), $"{team2Name}", centeredText);
+            DrawOutline(new Rect(meow, overlayY+2, 175, 50), $"{team2Name}", centeredText);
             
             
             centeredText.fontSize = 48;
-            DrawOutline(new Rect(meow, Screen.height-88, 225, 50), $"{team2Score}", centeredText);
+            DrawOutline(new Rect(meow, overlayY+12, 225, 50), $"{team2Score}", centeredText);
+
+
+            centeredText.alignment = TextAnchor.MiddleCenter;
+            centeredText.fontSize = 30;
+
+            TimeSpan time;
+                
+            if (timeRunning > 0)
+            {
+                time = TimeSpan.FromSeconds(timeRunning);
+
+                try
+                {
+                    string aaa = $"{time.Minutes}:{time.Seconds}:{time.Milliseconds.ToString().Substring(0, 2)}";
+                    DrawOutline(new Rect(meow - 150, overlayY+2, 300, 50), aaa,
+                        centeredText);
+                    lastTimeDisplay = aaa;
+                }
+                catch (Exception)
+                {
+                    DrawOutline(new Rect(meow - 150, overlayY+2, 300, 50), lastTimeDisplay,
+                        centeredText);
+                }
+            }else 
+                DrawOutline(new Rect(meow-150, overlayY+2, 300, 50), timeRunning.ToString("F1") + 
+                                                                     (timeRunning.ToString("F1").Contains("-") ? "-" : ""), centeredText);
             
-            centeredText.alignment = TextAnchor.UpperCenter;
-            centeredText.fontSize = 18;
+            time = TimeSpan.FromSeconds(timeToBeat);
+            
+            if (timeToBeat <= 0)
+            {
+                DrawOutline(new Rect(meow - 300, overlayY+42, 600, 50),
+                    $"0:0:00",
+                    centeredText);
+                return;
+            }
+            try
+            {
+                DrawOutline(new Rect(meow - 300, overlayY+42, 600, 50),
+                    $"{time.Minutes}:{time.Seconds}:{time.Milliseconds.ToString().Substring(0, 2)}",
+                    centeredText);
+
+            }
+            catch (Exception)
+            {
+                DrawOutline(new Rect(meow - 300, Screen.height - 58, 600, 50),
+                    $"{time.Minutes}:{time.Seconds}", centeredText);
+
+            }
+            
+
+            centeredText.fontSize = 24;
         }
+
+        private string lastTimeDisplay = ""; //  ig enuinely dont know why but sometimes the code above throws exceptions no matter what so im doing this stupid ass fix.
 
         public void OnGUI()
         {
@@ -417,7 +492,7 @@ namespace vynscastingmod
             labelText += "WASDQE -> Offset Camera Position\n";
             labelText += "R -> Reset Offsets\n";
             labelText += "P -> Toggle Headlock\n";
-            labelText += "NUMKEYS -> Switch Target\n";
+            labelText += "NUMKEYS -> Switch Target, shift makes runners only\n";
             labelText += "-= -> Decrease/Increase movement lerping\n";
             labelText += "[] -> Decrease/Increase rotation lerping\n";
             labelText += ",. -> Decrease/Increase rig lerping\n";
@@ -425,7 +500,12 @@ namespace vynscastingmod
             labelText += "V -> Push To Talk\n";
             labelText += "F1 -> Toggle Nametags\n";
             labelText += "F2 -> Change Nametag font\n";
-            labelText += "F3 -> Switch Overlays\n\n\n";
+            labelText += "F3 -> Switch Overlays\n";
+            labelText += "Arrows -> Move Overlays\n\n";
+            
+            
+            labelText += "Space -> Start/lap timer\n";
+            labelText += "V -> Reset round (lap & timer)\n\n\n";
 
             
             labelText += "Settings:\n\n";
@@ -481,5 +561,8 @@ namespace vynscastingmod
         private int overlayX = Screen.width/2, overlayY = Screen.height - 100;
 
         #endregion
+
+        private float timeRunning = -10, timeToBeat = -10;
+        private bool isTimerRunning = false;
     }
 }
