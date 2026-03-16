@@ -16,6 +16,7 @@ This casting mod is being made for the sole reason that there are no longer any 
 - Head/Body tracking & first person casting
 
 ## Todo:
+- Add Push-To-Talk
 - fix jittering when low smoothing (should js be fixed by switching to lateUpdate)
 - Fix scaling in small maps
 - Adjustable rig lerping (arrow keys?)
