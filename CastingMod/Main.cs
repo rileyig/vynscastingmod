@@ -96,7 +96,7 @@ namespace vynscastingmod
                 }
                 
                 loadedFont = loadedFonts[nameTagFont - 1];
-                
+                Overlays.InitOverlays();
 
                 instance = this;
                 initialized = true;
@@ -331,7 +331,9 @@ namespace vynscastingmod
             labelText += ",. -> Decrease/Increase rig lerping\n";
             labelText += ";' -> Decrease/Increase FOV\n";
             labelText += "V -> Push To Talk\n";
-            labelText += "F1 -> Toggle Nametags\n\n\n";
+            labelText += "F1 -> Toggle Nametags\n";
+            labelText += "F2 -> Change Nametag font\n";
+            labelText += "F3 -> Switch Overlays\n\n\n";
 
             
             labelText += "Settings:\n\n";
@@ -344,10 +346,10 @@ namespace vynscastingmod
             labelText += $"Rot Lerping: {rotSmoothing}\n";
             labelText += $"Rig Lerping: {rigLerpingMultiplier}\n";
             labelText += $"FOV: {camera.fieldOfView}\n";
-            labelText += $"Nametags: {nametagsEnabled}\n";
             
             GUI.Label(new Rect(5,75, Screen.width-10, Screen.height-75), labelText);
-            // Adding UI soon, no need for now with da binds :3
+            
+            // gonna add team name inputs when done with overlays
         }
         
         #endregion
