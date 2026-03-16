@@ -9,17 +9,15 @@ This casting mod is being made for the sole reason that there are no longer any 
 ## Features:
 - Doesn't work in VR.
 - Adjustable camera rotational and movement smoothing
+- Adjustable player smoothing (rig lerping)
 - Adjustable camera FOV
 - Adjustable offset via WASD
 - GUI Room joiner
 - Consistent smoothing, not based on FPS
 - Head/Body tracking & first person casting
+- Mic push-to-talk
 
 ## Todo:
-- Add Push-To-Talk
-- fix jittering when low smoothing (should js be fixed by switching to lateUpdate)
-- Fix scaling in small maps
-- Adjustable rig lerping (arrow keys?)
 - Add important features such as time of day changing, toggle leafs, nametags, hiding cosmetics, vstump manager, etc
 - Autosaving config, load on init
 - Add overlays, with timer & team score & player scoreboard
