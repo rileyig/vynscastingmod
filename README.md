@@ -1,6 +1,6 @@
 # vynscastingmod :3 
 
-Feature rich, intuitive gorilla tag casting mod.
+An open source (GPL v3), feature rich, intuitive gorilla tag casting mod. 
 
 Formerly known as frapster's casting mod pre-recode.
 
