@@ -68,7 +68,8 @@ namespace vynscastingmod
             }
             
             Application.targetFrameRate = int.MaxValue; // Gtag's fps is capped at 144 by default - no thanks.
-            uiNotificationTimer += Time.deltaTime;
+            uiNotificationTimer += Time.deltaTime; // Counts the timer up every frame in seconds - this same method of timing will be used when i add a timer overlay.
+            PhotonNetworkController.Instance.disableAFKKick = true; // ensure we dont get kicked for not moving.
 
             HandleLoadedRigs();
             HandleTargetSwitching();
