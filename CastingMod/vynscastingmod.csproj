@@ -27,6 +27,24 @@
         <Reference Include="clipper_library">
             <HintPath>$(GameAssemblyPath)\clipper_library.dll</HintPath>
         </Reference>
+        <Reference Include="Fusion.Common">
+          <HintPath>$(GameAssemblyPath)\Fusion.Common.dll</HintPath>
+        </Reference>
+        <Reference Include="Fusion.Log">
+          <HintPath>$(GameAssemblyPath)\Fusion.Log.dll</HintPath>
+        </Reference>
+        <Reference Include="Fusion.Realtime">
+          <HintPath>$(GameAssemblyPath)\Fusion.Realtime.dll</HintPath>
+        </Reference>
+        <Reference Include="Fusion.Runtime">
+          <HintPath>$(GameAssemblyPath)\Fusion.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="Fusion.Sockets">
+          <HintPath>$(GameAssemblyPath)\Fusion.Sockets.dll</HintPath>
+        </Reference>
+        <Reference Include="Fusion.Unity">
+          <HintPath>$(GameAssemblyPath)\Fusion.Unity.dll</HintPath>
+        </Reference>
         <Reference Include="Modio">
           <HintPath>$(GameAssemblyPath)\Modio.dll</HintPath>
         </Reference>
