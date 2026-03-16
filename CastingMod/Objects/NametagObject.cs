@@ -30,6 +30,8 @@ namespace vynscastingmod.Objects
                 Destroy(textObj.gameObject);
                 Destroy(this);
             }
+            
+            textObj.font = Main.instance.loadedFont;
             textObj.transform.position = attachedRig.transform.position + (Vector3.up * 0.4f);
             textObj.transform.rotation = Main.instance.camera.transform.rotation;
             textObj.text = attachedRig.playerNameVisible;
