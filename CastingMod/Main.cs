@@ -376,7 +376,7 @@ namespace vynscastingmod
         private bool headLock = true;
 
         public bool nametagsEnabled = false;
-        public int nameTagFont = 6;
+        public int nameTagFont = 5;
         public TMP_FontAsset loadedFont;
 
         #endregion
