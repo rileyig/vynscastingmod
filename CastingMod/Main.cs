@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using BepInEx;
 using GorillaLocomotion;
 using GorillaNetworking;
@@ -277,6 +278,27 @@ namespace vynscastingmod
                 Notify($"Set time of day to: {timeOfDay}");
             }
             
+            if (Keyboard.current.f5Key.wasPressedThisFrame)
+            {
+                cosmeticsHidden = !cosmeticsHidden;
+                loadedRigs.ForEach(rig =>
+                {
+                    if (cosmeticsHidden)
+                    {
+                        rig.LocalUpdateCosmeticsWithTryon(CosmeticsController.CosmeticSet.EmptySet,
+                            CosmeticsController.CosmeticSet.EmptySet, false);
+                    }
+                    else
+                    {
+                        NetworkView view = (NetworkView)typeof(VRRig).GetField("netView",
+                            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).GetValue(rig); // why would you make this internal lemmone :(
+
+                            view.SendRPC("RPC_RequestCosmetics", rig.OwningNetPlayer);
+                    }
+                });
+                Notify(cosmeticsHidden ? "Disabled cosemtics." : "Enabled cosemtics.");
+            }
+            
             
             // moving overlay thingy :3
             if (Keyboard.current.upArrowKey.isPressed) overlayY -= 3;
@@ -286,7 +308,7 @@ namespace vynscastingmod
             
             if(overlayX < 267) overlayX = 267;
             if(overlayX > Screen.width-267) overlayX = Screen.width-267;
-            if(overlayY < 10) overlayY = 0;
+            if(overlayY < 10) overlayY = 10;
             if (overlayY > Screen.height - 90) overlayY = Screen.height - 90;
 
 
@@ -510,6 +532,7 @@ namespace vynscastingmod
             labelText += "F2 -> Change Nametag font\n";
             labelText += "F3 -> Switch Overlays\n";
             labelText += "F4 -> Change Time Of Day\n";
+            labelText += "F5 -> Hide all cosmetics\n";
             labelText += "Arrows -> Move Overlay\n\n";
             
             
@@ -561,7 +584,7 @@ namespace vynscastingmod
 
         private float xOffset = 0, yOffset = 0, zOffset = 0;
         private float moveSmoothing = 0, rotSmoothing = 0, rigLerpingMultiplier = 1;
-        private bool headLock = true;
+        private bool headLock = true, cosmeticsHidden = false;
 
         public bool nametagsEnabled = false;
         public int nameTagFont = 5, scoreOverlay = 0;
