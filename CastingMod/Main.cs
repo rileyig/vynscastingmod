@@ -170,12 +170,15 @@ namespace vynscastingmod
             if (Keyboard.current.leftBracketKey.isPressed) rotSmoothing -= rotSmoothing < 0.8f ? 0.0025f : 0.0005f;
             if (Keyboard.current.rightBracketKey.isPressed) rotSmoothing += rotSmoothing < 0.8f ? 0.0025f : 0.0005f;
             float postSmoothing = moveSmoothing + rotSmoothing;
-
+            
+            moveSmoothing = Mathf.Clamp(moveSmoothing, 0, 1);
+            rotSmoothing = Mathf.Clamp(rotSmoothing, 0, 1);
             if (postSmoothing != smoothing) Notify($"Changed smoothing!\nMovement: {moveSmoothing}\nRotation: {rotSmoothing}");
             
             float lastRiglerp = rigLerpingMultiplier;
-            if (Keyboard.current.commaKey.isPressed) rigLerpingMultiplier -= 3 * Time.deltaTime;
-            if (Keyboard.current.periodKey.isPressed) rigLerpingMultiplier += 3 * Time.deltaTime;
+            if (Keyboard.current.commaKey.isPressed) rigLerpingMultiplier -= 0.5f * Time.deltaTime;
+            if (Keyboard.current.periodKey.isPressed) rigLerpingMultiplier += 0.5f * Time.deltaTime;
+            
             
             if(rigLerpingMultiplier != lastRiglerp) Notify($"Changed rig lerping!\nLerping: {rigLerpingMultiplier}");
 
@@ -185,8 +188,6 @@ namespace vynscastingmod
             
             if(camera.fieldOfView != lastFov) Notify($"Changed FOV: {camera.fieldOfView}");
             
-            moveSmoothing = Mathf.Clamp(moveSmoothing, 0, 1);
-            rotSmoothing = Mathf.Clamp(rotSmoothing, 0, 1);
         }
 
         private void HandleRigModifiers()
@@ -237,7 +238,7 @@ namespace vynscastingmod
                 Color color = Color.white;
                 color.a = 1 - (uiNotificationTimer / 3);
                 centeredText.normal.textColor = color;
-                GUI.Label(new Rect(0,0, Screen.width, Screen.height), uiNotificationText, centeredText);
+                GUI.Label(new Rect(0,5, Screen.width, Screen.height-5), uiNotificationText, centeredText);
             }
             
             centeredText.normal.textColor = Color.white;
