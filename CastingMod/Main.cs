@@ -27,6 +27,8 @@ namespace vynscastingmod
         public const string modId = "com.vyn.castingClient";
         public const string modName = "CastingClient";
         public const string modVer = "1.0.0";
+
+        public static Main instance;
         
         public void LateUpdate() // Testing lateUpdate, should fix camera jittering.
         {
@@ -64,7 +66,8 @@ namespace vynscastingmod
                 addCam.renderPostProcessing = false;
                 addCam.SetRenderer(0); 
                 addCam.renderType = CameraRenderType.Base;
-                
+
+                instance = this;
                 initialized = true;
             }
             
@@ -332,8 +335,9 @@ namespace vynscastingmod
 
         private float xOffset = 0, yOffset = 0, zOffset = 0;
         private float moveSmoothing = 0, rotSmoothing = 0, rigLerpingMultiplier = 1;
-        private bool headLock = true, nametagsEnabled = false;
-        
+        private bool headLock = true;
+
+        public bool nametagsEnabled = false;
 
         #endregion
     }
