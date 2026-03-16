@@ -179,6 +179,7 @@ namespace vynscastingmod
             if (Keyboard.current.commaKey.isPressed) rigLerpingMultiplier -= 0.5f * Time.deltaTime;
             if (Keyboard.current.periodKey.isPressed) rigLerpingMultiplier += 0.5f * Time.deltaTime;
             
+            rigLerpingMultiplier = Mathf.Clamp(rigLerpingMultiplier, 1, 10);
             
             if(rigLerpingMultiplier != lastRiglerp) Notify($"Changed rig lerping!\nLerping: {rigLerpingMultiplier}");
 
