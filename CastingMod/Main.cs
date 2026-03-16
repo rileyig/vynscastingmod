@@ -238,6 +238,25 @@ namespace vynscastingmod
                 loadedFont = loadedFonts[nameTagFont - 1];
                 Notify($"Set nametag font to: {nameTagFont}");
             }
+            
+            if (Keyboard.current.f3Key.wasPressedThisFrame)
+            {
+                scoreOverlay++;
+                if (scoreOverlay > 2) scoreOverlay = 0;
+                Notify($"Set score overlay to: {scoreOverlay}");
+            }
+            
+            
+            // moving overlay thingy :3
+            if (Keyboard.current.upArrowKey.isPressed) overlayY -= 1;
+            if (Keyboard.current.downArrowKey.isPressed) overlayY += 1;
+            if (Keyboard.current.leftArrowKey.isPressed) overlayX -= 1;
+            if (Keyboard.current.rightArrowKey.isPressed) overlayX += 1;
+            
+            if(overlayX < 267) overlayX = 267;
+            if(overlayX > Screen.width-267) overlayX = Screen.width-267;
+            if(overlayY < 90) overlayY = 90;
+            if (overlayY > Screen.height - 90) overlayY = Screen.height - 90;
         }
 
         private void HandleRigModifiers()
@@ -286,12 +305,15 @@ namespace vynscastingmod
 
         private void RenderOverlays()
         {
+            int centerX = Screen.width / 2; // useful for overlays and other thingies like idk
+            
             if (centeredText == null)
             {
                 centeredText = new GUIStyle(GUI.skin.label);
                 centeredText.alignment = TextAnchor.UpperCenter;
                 centeredText.fontSize = 18;
             }
+            
             if (!uiNotificationText.IsNullOrEmpty() && uiNotificationTimer < 3) // only show notif text under 3 secs
             {
                 Color color = Color.white;
@@ -301,6 +323,20 @@ namespace vynscastingmod
             }
             
             centeredText.normal.textColor = Color.white;
+            
+            int meow = overlayX;
+            if (overlayX - centerX < 20 && overlayX - centerX > -20) meow = centerX;
+
+            switch (scoreOverlay)
+            {
+                case 1:
+                    GUI.DrawTexture(new Rect(meow-277, overlayY, 277*2, 45*2), Overlays.cgtDefault);
+                    break;
+                case 2:
+                    GUI.DrawTexture(new Rect(meow-277, overlayY, 277*2, 45*2), Overlays.cgtPink);
+                    break;
+                
+            }
         }
         
         public void OnGUI()
@@ -381,8 +417,10 @@ namespace vynscastingmod
         private bool headLock = true;
 
         public bool nametagsEnabled = false;
-        public int nameTagFont = 5;
+        public int nameTagFont = 5, scoreOverlay = 0;
         public TMP_FontAsset loadedFont;
+
+        private int overlayX = Screen.width/2, overlayY = Screen.height - 100;
 
         #endregion
     }
