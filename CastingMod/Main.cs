@@ -301,7 +301,6 @@ namespace vynscastingmod
             if (Keyboard.current.f4Key.wasPressedThisFrame)
             {
                 timeOfDay++;
-                BetterDayNightManager.instance.SetTimeOfDay(timeOfDay);
                 if (timeOfDay > 9) timeOfDay = 0;
                 Notify($"Set time of day to: {timeOfDay}");
             }
@@ -395,6 +394,7 @@ namespace vynscastingmod
         {
             uiNotificationTimer = 0;
             uiNotificationText = message;
+            
         }
 
         private void DrawOutline(Rect position, String text, GUIStyle style){ //another horribly coded method from v2, ported with old overlays
@@ -436,6 +436,9 @@ namespace vynscastingmod
 
             if (!uiNotificationText.IsNullOrEmpty() && uiNotificationTimer < 3) // only show notif text under 3 secs
             {
+                BetterDayNightManager.instance.SetTimeOfDay(timeOfDay); // as stupid as it seems to have this in OnGUI, it's kinda better because
+                // it doesn't have the performance hit that doing it every frame on Update does, but calling it just once doesnt work sometimes.
+                
                 Color color = Color.white;
                 color.a = 1 - (uiNotificationTimer / 3);
                 centeredText.normal.textColor = color;
@@ -627,6 +630,10 @@ namespace vynscastingmod
             cfg.WriteLine(nameTagFont);
             cfg.WriteLine(scoreOverlay);
             cfg.WriteLine(nametagsEnabled);
+            
+            cfg.WriteLine(timeOfDay);
+            cfg.WriteLine(overlayX);
+            cfg.WriteLine(overlayY);
             cfg.Close();
         }
 
@@ -654,6 +661,10 @@ namespace vynscastingmod
                     rig.GetOrAddComponent<NametagObject>(out var unused);
                 });
             }
+            
+            timeOfDay = int.Parse(setts[10]);
+            overlayX = int.Parse(setts[11]);
+            overlayY = int.Parse(setts[12]);
             
             cfg.Close();
         }
