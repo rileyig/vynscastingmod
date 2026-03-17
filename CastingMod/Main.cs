@@ -348,12 +348,25 @@ namespace vynscastingmod
             
             // moving overlay thingy :3
             int overlayPre = overlayX + overlayY;
-            if (Keyboard.current.upArrowKey.isPressed) overlayY -= 3;
-            if (Keyboard.current.downArrowKey.isPressed) overlayY += 3;
-            if (Keyboard.current.leftArrowKey.isPressed) overlayX -= 3;
-            if (Keyboard.current.rightArrowKey.isPressed) overlayX += 3;
+            int leaderPre = leaderboardY;
+            if (Keyboard.current.upArrowKey.isPressed)
+            {
+                if (Keyboard.current.shiftKey.isPressed) leaderboardY -= 3;
+                else overlayY -= 3;
+            }
+
+            if (Keyboard.current.downArrowKey.isPressed)
+            {
+                if (Keyboard.current.shiftKey.isPressed) leaderboardY += 3;
+                else overlayY += 3;
+            }
+            if (Keyboard.current.leftArrowKey.isPressed && !Keyboard.current.shiftKey.isPressed) overlayX -= 3;
+            if (Keyboard.current.rightArrowKey.isPressed && !Keyboard.current.shiftKey.isPressed) overlayX += 3;
+            
             int overlayPost = overlayX + overlayY;
+            if (leaderboardY > Screen.height - 30) leaderboardY = Screen.height - 30;
             if(overlayPost != overlayPre) Notify($"Changed overlay pos!\nPosX: {overlayX}\nPosY: {overlayY}");
+            if(leaderboardY != leaderPre) Notify($"Changed leaderboard pos!\nPosY: {leaderboardY}");
             
             if(overlayX < 267) overlayX = 267;
             if(overlayX > Screen.width-267) overlayX = Screen.width-267;
@@ -649,7 +662,7 @@ namespace vynscastingmod
             labelText += "F4 -> Switch Leaderboards\n";
             labelText += "F5 -> Change Time Of Day\n";
             labelText += "F6 -> Hide all cosmetics\n";
-            labelText += "Arrows -> Move Overlay\n\n";
+            labelText += "Arrows -> Move Overlay, shift for leaderboard\n\n";
             
             
             labelText += "Space -> Start/lap timer\n";
@@ -697,8 +710,12 @@ namespace vynscastingmod
             cfg.WriteLine(nametagsEnabled);
             
             cfg.WriteLine(timeOfDay);
+            
             cfg.WriteLine(overlayX);
             cfg.WriteLine(overlayY);
+            
+            cfg.WriteLine(leaderboardOverlay);
+            cfg.WriteLine(leaderboardY);
             cfg.Close();
         }
 
@@ -730,6 +747,9 @@ namespace vynscastingmod
             timeOfDay = int.Parse(setts[10]);
             overlayX = int.Parse(setts[11]);
             overlayY = int.Parse(setts[12]);
+            
+            leaderboardOverlay = int.Parse(setts[13]);
+            leaderboardY = int.Parse(setts[14]);
             
             cfg.Close();
         }
