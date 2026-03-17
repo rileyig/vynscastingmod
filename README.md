@@ -19,6 +19,9 @@ This casting mod is being made for the sole reason that there are no longer any 
 - Non-bloated UI, control everything with hotkeys.
 
 ## Todo:
+- Make discord only open on first launch, add version checker w/ gist to check if version is outdated
+- Make room joiner post notification if joining failed
+- Add player leaderboard on left side (moveable w/ pageUp/pageDown?)
 - Custom overlay upload, make overlay parts draggable with mouse (team scores, names) LOCAL POSITIONS TO OVERLAY.
 - Autosaving config, load config on init
 - Implement GTR api to get peoples ranks on nametags, add FPS Checker, platform checker, prop checker maybe?
