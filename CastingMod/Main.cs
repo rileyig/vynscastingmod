@@ -278,7 +278,7 @@ namespace vynscastingmod
                     disabledCosmeticsRig = target;
                     
                     disabledCosmeticsRig.LocalUpdateCosmeticsWithTryon(CosmeticsController.CosmeticSet.EmptySet, CosmeticsController.CosmeticSet.EmptySet, false);
-                }else if (disabledCosmeticsRig == null)
+                }else if (disabledCosmeticsRig != null)
                 {
                     NetworkView view = (NetworkView)typeof(VRRig).GetField("netView",
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).GetValue(disabledCosmeticsRig); // why would you make this internal lemmone :(
@@ -444,7 +444,7 @@ namespace vynscastingmod
             if (firstPersonEnabled)
             {
                 cameraTransform.position = targetPosition;
-                cameraTransform.rotation = Quaternion.Lerp(cameraTransform.rotation, cameraTransform.rotation, (1-rotSmoothing) * lerpDelta);
+                cameraTransform.rotation = Quaternion.Lerp(cameraTransform.rotation, targetTransform.rotation, (1-rotSmoothing) * lerpDelta);
                 return;
             }
             
