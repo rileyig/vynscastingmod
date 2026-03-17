@@ -716,6 +716,7 @@ namespace vynscastingmod
             
             cfg.WriteLine(leaderboardOverlay);
             cfg.WriteLine(leaderboardY);
+            cfg.WriteLine(camera.fieldOfView);
             cfg.Close();
         }
 
@@ -751,6 +752,7 @@ namespace vynscastingmod
             leaderboardOverlay = int.Parse(setts[13]);
             leaderboardY = int.Parse(setts[14]);
             
+            camera.fieldOfView = float.Parse(setts[15]);
             cfg.Close();
         }
 
