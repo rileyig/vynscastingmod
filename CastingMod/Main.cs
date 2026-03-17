@@ -642,7 +642,7 @@ namespace vynscastingmod
             }
             else if(GUI.Button(new Rect(5, 40, 200, 30), "Join Room")) PhotonNetworkController.Instance.AttemptToJoinSpecificRoom(roomToJoin, JoinType.Solo);
 
-            string labelText = modName + " " + modVer + " - discord.gg/KPhreBySxr";
+            string labelText = modName + " " + modVer + " - discord.gg/KPhreBySxr\n";
             labelText += "Bindings:\n\n";
 
             labelText += "ESC -> Toggle UI (this)\n";
