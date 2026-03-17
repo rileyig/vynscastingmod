@@ -299,15 +299,15 @@ namespace vynscastingmod
             
             float postSmoothing = moveSmoothing + rotSmoothing;
             
-            moveSmoothing = Mathf.Clamp(moveSmoothing, 0, 1);
-            rotSmoothing = Mathf.Clamp(rotSmoothing, 0, 1);
+            moveSmoothing = Math.Clamp(moveSmoothing, 0, 1);
+            rotSmoothing = Math.Clamp(rotSmoothing, 0, 1);
             if (postSmoothing != smoothing) Notify($"Changed smoothing!\nMovement: {moveSmoothing}\nRotation: {rotSmoothing}");
             
             float lastRiglerp = rigLerpingMultiplier;
             if (Keyboard.current.commaKey.isPressed) rigLerpingMultiplier -= 0.5f * Time.deltaTime;
             if (Keyboard.current.periodKey.isPressed) rigLerpingMultiplier += 0.5f * Time.deltaTime;
             
-            rigLerpingMultiplier = Mathf.Clamp(rigLerpingMultiplier, 1, 10);
+            rigLerpingMultiplier = Math.Clamp(rigLerpingMultiplier, 1, 10);
             
             if(rigLerpingMultiplier != lastRiglerp) Notify($"Changed rig lerping!\nLerping: {rigLerpingMultiplier}");
 
@@ -316,7 +316,7 @@ namespace vynscastingmod
             if(Keyboard.current.quoteKey.isPressed) camera.fieldOfView += 5 * Time.deltaTime;
             
             if(camera.fieldOfView != lastFov) Notify($"Changed FOV: {camera.fieldOfView}");
-
+    
             if (Keyboard.current.f1Key.wasPressedThisFrame)
             {
                 nametagsEnabled = !nametagsEnabled;
