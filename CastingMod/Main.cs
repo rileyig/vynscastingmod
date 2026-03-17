@@ -312,12 +312,19 @@ namespace vynscastingmod
             
             if (Keyboard.current.f4Key.wasPressedThisFrame)
             {
+                leaderboardOverlay++;
+                if (leaderboardOverlay > 1) leaderboardOverlay = 0;
+                Notify($"Set score overlay to: {leaderboardOverlay}");
+            }
+            
+            if (Keyboard.current.f5Key.wasPressedThisFrame)
+            {
                 timeOfDay++;
                 if (timeOfDay > 9) timeOfDay = 0;
                 Notify($"Set time of day to: {timeOfDay}");
             }
             
-            if (Keyboard.current.f5Key.wasPressedThisFrame)
+            if (Keyboard.current.f6Key.wasPressedThisFrame)
             {
                 cosmeticsHidden = !cosmeticsHidden;
                 loadedRigs.ForEach(rig =>
@@ -428,47 +435,15 @@ namespace vynscastingmod
             GUI.Label(position, text, style);
         }
 
-        private void RenderOverlays()
+        private void RenderTeamInfo()
         {
             int centerX = Screen.width / 2; // useful for overlays and other thingies like idk
-
-            if (centeredText == null)
-            {
-                centeredText = new GUIStyle(GUI.skin.label);
-            }
-
-            if (outdatedBuild)
-            {
-                centeredText.fontSize = 12;
-                centeredText.alignment = TextAnchor.UpperRight;
-                centeredText.normal.textColor = Color.red;
-                GUI.Label(new Rect(5,5,Screen.width-10,Screen.height-10), $"You are using an outdated build of vyn's casting mod\nLatest version: {fetchedVer}", centeredText);
             
-                centeredText.normal.textColor = Color.white;
-            }
-            centeredText.alignment = TextAnchor.UpperCenter;
-            centeredText.fontSize = 18;
-
-            if (!uiNotificationText.IsNullOrEmpty() && uiNotificationTimer < 3) // only show notif text under 3 secs
-            {
-                BetterDayNightManager.instance.SetTimeOfDay(timeOfDay); // as stupid as it seems to have this in OnGUI, it's kinda better because
-                // it doesn't have the performance hit that doing it every frame on Update does, but calling it just once doesnt work sometimes.
-                
-                Color color = Color.white;
-                color.a = 1 - (uiNotificationTimer / 3);
-                centeredText.normal.textColor = color;
-                GUI.Label(new Rect(0, 5, Screen.width, Screen.height - 5), uiNotificationText, centeredText);
-            }else if (!uiNotificationText.IsNullOrEmpty() && !uiNotificationText.Contains("Config") && uiNotificationTimer > 5)
-            {
-                uiNotificationText = "";
-                SaveConfig();
-                Notify("Autosaved Config.");
-                uiNotificationTimer = 1.5f;
-            }
-
-            if (scoreOverlay == 0) return;
-
-            centeredText.normal.textColor = Color.white;
+            if(overlayY == -1) overlayY = Screen.height - 100;
+            if(overlayX == -1) overlayX = centerX;
+            
+            
+            labelStyle.normal.textColor = Color.white;
             int meow = overlayX;
             if (overlayX - centerX < 25 && overlayX - centerX > -25) meow = centerX;
 
@@ -484,28 +459,28 @@ namespace vynscastingmod
             }
 
 
-            centeredText.fontSize = 32;
-            centeredText.alignment = TextAnchor.MiddleLeft;
-            DrawOutline(new Rect(meow - 175, overlayY + 2, 173, 50), $"{team1Name}", centeredText);
+            labelStyle.fontSize = 32;
+            labelStyle.alignment = TextAnchor.MiddleLeft;
+            DrawOutline(new Rect(meow - 175, overlayY + 2, 173, 50), $"{team1Name}", labelStyle);
 
 
 
-            centeredText.fontSize = 48;
-            DrawOutline(new Rect(meow - 225, overlayY + 12, 225, 50), $"{team1Score}", centeredText);
+            labelStyle.fontSize = 48;
+            DrawOutline(new Rect(meow - 225, overlayY + 12, 225, 50), $"{team1Score}", labelStyle);
             
             
             
-            centeredText.fontSize = 32;
-            centeredText.alignment = TextAnchor.MiddleRight;
-            DrawOutline(new Rect(meow, overlayY+2, 175, 50), $"{team2Name}", centeredText);
+            labelStyle.fontSize = 32;
+            labelStyle.alignment = TextAnchor.MiddleRight;
+            DrawOutline(new Rect(meow, overlayY+2, 175, 50), $"{team2Name}", labelStyle);
             
             
-            centeredText.fontSize = 48;
-            DrawOutline(new Rect(meow, overlayY+12, 225, 50), $"{team2Score}", centeredText);
+            labelStyle.fontSize = 48;
+            DrawOutline(new Rect(meow, overlayY+12, 225, 50), $"{team2Score}", labelStyle);
 
 
-            centeredText.alignment = TextAnchor.MiddleCenter;
-            centeredText.fontSize = 30;
+            labelStyle.alignment = TextAnchor.MiddleCenter;
+            labelStyle.fontSize = 30;
 
             TimeSpan time;
                 
@@ -517,17 +492,17 @@ namespace vynscastingmod
                 {
                     string aaa = $"{time.Minutes}:{time.Seconds}:{time.Milliseconds.ToString().Substring(0, 2)}";
                     DrawOutline(new Rect(meow - 150, overlayY+2, 300, 50), aaa,
-                        centeredText);
+                        labelStyle);
                     lastTimeDisplay = aaa;
                 }
                 catch (Exception)
                 {
                     DrawOutline(new Rect(meow - 150, overlayY+2, 300, 50), lastTimeDisplay,
-                        centeredText);
+                        labelStyle);
                 }
             }else 
                 DrawOutline(new Rect(meow-150, overlayY+2, 300, 50), timeRunning.ToString("F1") + 
-                                                                     (timeRunning.ToString("F1").Contains("-") ? "-" : ""), centeredText);
+                                                                     (timeRunning.ToString("F1").Contains("-") ? "-" : ""), labelStyle);
             
             time = TimeSpan.FromSeconds(timeToBeat);
             
@@ -535,25 +510,99 @@ namespace vynscastingmod
             {
                 DrawOutline(new Rect(meow - 300, overlayY+42, 600, 50),
                     $"0:0:00",
-                    centeredText);
+                    labelStyle);
                 return;
             }
             try
             {
                 DrawOutline(new Rect(meow - 300, overlayY+42, 600, 50),
                     $"{time.Minutes}:{time.Seconds}:{time.Milliseconds.ToString().Substring(0, 2)}",
-                    centeredText);
+                    labelStyle);
 
             }
             catch (Exception)
             {
                 DrawOutline(new Rect(meow - 300, Screen.height - 58, 600, 50),
-                    $"{time.Minutes}:{time.Seconds}", centeredText);
+                    $"{time.Minutes}:{time.Seconds}", labelStyle);
 
             }
+
+
+            labelStyle.fontSize = 18;
+        }
+
+        private void RenderLeaderboard()
+        {
+            if (leaderboardY == -1) leaderboardY = Screen.height-30;
+            labelStyle.fontSize = 18;
+            labelStyle.alignment = TextAnchor.MiddleLeft;
+            int y = 0;
+            int num = 0;
+            foreach (var plr in loadedRigs)
+            {
+                // x200 y30
+
+                switch (leaderboardOverlay)
+                {
+                    case 1:
+                        GUI.DrawTexture(new Rect(0, leaderboardY-y, 200, 30), Overlays.leaderboardPart);
+                        break;
+                }
+                
+                GUI.Label(new Rect(3, leaderboardY-y, 194, 30), $"{num}  {plr.playerNameVisible}", labelStyle);
+
+                y += 33;
+                num++;
+            }
+        }
+
+        private void RenderOverlays()
+        {
+            int centerX = Screen.width / 2; // useful for overlays and other thingies like idk
+
+            if (labelStyle == null)
+            {
+                labelStyle = new GUIStyle(GUI.skin.label);
+                labelStyle.fontStyle = FontStyle.Bold;
+            }
+
+            if (outdatedBuild)
+            {
+                labelStyle.fontSize = 12;
+                labelStyle.alignment = TextAnchor.UpperRight;
+                labelStyle.normal.textColor = Color.red;
+                GUI.Label(new Rect(5,5,Screen.width-10,Screen.height-10), $"You are using an outdated build of vyn's casting mod\nLatest version: {fetchedVer}", labelStyle);
+            
+                labelStyle.normal.textColor = Color.white;
+            }
+            
+            labelStyle.alignment = TextAnchor.UpperCenter;
+            labelStyle.fontSize = 18;
+
+            // Notification stuffs
+            if (!uiNotificationText.IsNullOrEmpty() && uiNotificationTimer < 3) // only show notif text under 3 secs
+            {
+                BetterDayNightManager.instance.SetTimeOfDay(timeOfDay); // as stupid as it seems to have this in OnGUI, it's kinda better because
+                // it doesn't have the performance hit that doing it every frame on Update does, but calling it just once doesnt work sometimes.
+                
+                Color color = Color.white;
+                color.a = 1 - (uiNotificationTimer / 3);
+                labelStyle.normal.textColor = color;
+                GUI.Label(new Rect(0, 5, Screen.width, Screen.height - 5), uiNotificationText, labelStyle);
+            }else if (!uiNotificationText.IsNullOrEmpty() && !uiNotificationText.Contains("Config") && uiNotificationTimer > 5)
+            {
+                uiNotificationText = "";
+                SaveConfig();
+                Notify("Autosaved Config.");
+                uiNotificationTimer = 1.5f;
+            }
+            // Notification stuffs
+            
             
 
-            centeredText.fontSize = 24;
+            if (scoreOverlay != 0) RenderTeamInfo();
+
+            if (leaderboardOverlay != 0) RenderLeaderboard();
         }
 
         private string lastTimeDisplay = ""; //  ig enuinely dont know why but sometimes the code above throws exceptions no matter what so im doing this stupid ass fix.
@@ -597,8 +646,9 @@ namespace vynscastingmod
             labelText += "F1 -> Toggle Nametags\n";
             labelText += "F2 -> Change Nametag font\n";
             labelText += "F3 -> Switch Overlays\n";
-            labelText += "F4 -> Change Time Of Day\n";
-            labelText += "F5 -> Hide all cosmetics\n";
+            labelText += "F4 -> Switch Leaderboards\n";
+            labelText += "F5 -> Change Time Of Day\n";
+            labelText += "F6 -> Hide all cosmetics\n";
             labelText += "Arrows -> Move Overlay\n\n";
             
             
@@ -698,7 +748,7 @@ namespace vynscastingmod
         private string uiNotificationText = "", fetchedVer = "";
         private List<TMP_FontAsset> loadedFonts = new List<TMP_FontAsset>();
         private string roomToJoin = "LUCIO";
-        private GUIStyle centeredText = null;
+        private GUIStyle labelStyle = null;
         
         private string team1Name = "TTT";
         private string team2Name = "TSO";
@@ -716,10 +766,10 @@ namespace vynscastingmod
         private bool headLock = true, cosmeticsHidden = false;
 
         public bool nametagsEnabled = false;
-        public int nameTagFont = 5, scoreOverlay = 0;
+        public int nameTagFont = 5, scoreOverlay = 0, leaderboardOverlay = 0;
         public TMP_FontAsset loadedFont;
 
-        private int overlayX = Screen.width/2, overlayY = Screen.height - 100, timeOfDay = 0;
+        private int overlayX = -1, overlayY = -1, leaderboardY = -1, timeOfDay = 0;
 
         #endregion
 
