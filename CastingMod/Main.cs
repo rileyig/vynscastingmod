@@ -179,7 +179,22 @@ namespace vynscastingmod
             target.lerpValueBody = 0.155f;
             target.lerpValueFingers = 0.155f;
 
+            if (firstPersonEnabled)
+            {
+                NetworkView view = (NetworkView)typeof(VRRig).GetField("netView",
+                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).GetValue(disabledCosmeticsRig); // why would you make this internal lemmone :(
+
+                view.SendRPC("RPC_RequestCosmetics", disabledCosmeticsRig.OwningNetPlayer);
+            }
+
             target = loadedRigs[targetNum];
+
+            if (firstPersonEnabled)
+            {
+                disabledCosmeticsRig = target;
+                        
+                disabledCosmeticsRig.LocalUpdateCosmeticsWithTryon(CosmeticsController.CosmeticSet.EmptySet, CosmeticsController.CosmeticSet.EmptySet, false);
+            }
         }
         
         private void setTarget(VRRig rig)
@@ -187,7 +202,22 @@ namespace vynscastingmod
             target.lerpValueBody = 0.155f;
             target.lerpValueFingers = 0.155f;
 
+            if (firstPersonEnabled)
+            {
+                NetworkView view = (NetworkView)typeof(VRRig).GetField("netView",
+                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).GetValue(disabledCosmeticsRig); // why would you make this internal lemmone :(
+
+                view.SendRPC("RPC_RequestCosmetics", disabledCosmeticsRig.OwningNetPlayer);
+            }
+            
             target = rig;
+            
+            if (firstPersonEnabled)
+            {
+                disabledCosmeticsRig = target;
+                        
+                disabledCosmeticsRig.LocalUpdateCosmeticsWithTryon(CosmeticsController.CosmeticSet.EmptySet, CosmeticsController.CosmeticSet.EmptySet, false);
+            }
         }
 
         private void HandleTargetSwitching()
@@ -619,8 +649,15 @@ namespace vynscastingmod
                         GUI.DrawTexture(new Rect(0, leaderboardY-y, 200, 30), Overlays.customLeaderboard);
                         break;
                 }
+
+                labelStyle.normal.textColor = plr.lavaParticleSystem.isPlaying || plr.rockParticleSystem.isPlaying
+                    ? Color.red
+                    : plr.playerColor;
                 
-                GUI.Label(new Rect(5, leaderboardY-y, 190, 30), $"{num}   {plr.playerNameVisible}", labelStyle);
+                GUI.Label(new Rect(7, leaderboardY-y, 23, 30), $"{num}", labelStyle);
+
+                labelStyle.normal.textColor = Color.white;
+                GUI.Label(new Rect(30, leaderboardY-y, 170, 30), $"{plr.playerNameVisible}", labelStyle);
 
                 y += 35;
                 num++;
