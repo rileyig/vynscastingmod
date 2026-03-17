@@ -547,7 +547,7 @@ namespace vynscastingmod
         private void RenderLeaderboard()
         {
             if (leaderboardY == -1) leaderboardY = Screen.height-30;
-            labelStyle.fontSize = 18;
+            labelStyle.fontSize = 16;
             labelStyle.alignment = TextAnchor.MiddleLeft;
             int y = 0;
             int num = 0;
