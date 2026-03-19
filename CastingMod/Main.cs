@@ -163,7 +163,11 @@ namespace vynscastingmod
                 
                 if (loadedRigs.Count > 1)
                 {
-                    FindObjectsOfType<NametagObject>().ForEach(no => Destroy(no));
+                    FindObjectsOfType<NametagObject>().ForEach(no =>
+                    {
+                        Destroy(no.textObj);
+                        Destroy(no);
+                    });
                     
                     loadedRigs.Clear();
                     loadedRigs.Add(offlineRig);
@@ -173,7 +177,11 @@ namespace vynscastingmod
 
             if (loadedRigs.Count != PhotonNetwork.CurrentRoom.PlayerCount)
             {
-                FindObjectsOfType<NametagObject>().ForEach(no => Destroy(no));
+                FindObjectsOfType<NametagObject>().ForEach(no =>
+                {
+                    Destroy(no.textObj);
+                    Destroy(no);
+                });
                 
                 loadedRigs.Clear();
                 loadedRigs.AddRange(GameObject.FindObjectsOfType<VRRig>());
