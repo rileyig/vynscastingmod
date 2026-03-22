@@ -31,7 +31,7 @@ namespace vynscastingmod
     {
         public const string modId = "com.vyn.castingClient";
         public const string modName = "vyn's casting mod";
-        public const string modVer = "3.0.1";
+        public const string modVer = "3.0.2";
 
         public static Main instance;
         
