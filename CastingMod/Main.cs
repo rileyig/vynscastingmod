@@ -31,7 +31,7 @@ namespace vynscastingmod
     {
         public const string modId = "com.vyn.castingClient";
         public const string modName = "vyn's casting mod";
-        public const string modVer = "3.0.2";
+        public const string modVer = "3.0.3";
 
         public static Main instance;
         
@@ -163,11 +163,13 @@ namespace vynscastingmod
                 
                 if (loadedRigs.Count > 1)
                 {
-                    FindObjectsOfType<NametagObject>().ForEach(no =>
+                    foreach ((string,NametagObject) valueTuple in tags)
                     {
+                        var no = valueTuple.Item2;
+                        no.textObj.text = "";
                         Destroy(no.textObj);
                         Destroy(no);
-                    });
+                    }
                     
                     loadedRigs.Clear();
                     loadedRigs.Add(offlineRig);
@@ -177,11 +179,13 @@ namespace vynscastingmod
 
             if (loadedRigs.Count != PhotonNetwork.CurrentRoom.PlayerCount)
             {
-                FindObjectsOfType<NametagObject>().ForEach(no =>
+                foreach ((string,NametagObject) valueTuple in tags)
                 {
+                    var no = valueTuple.Item2;
+                    no.textObj.text = "";
                     Destroy(no.textObj);
                     Destroy(no);
-                });
+                }
                 
                 loadedRigs.Clear();
                 loadedRigs.AddRange(GameObject.FindObjectsOfType<VRRig>());
@@ -876,6 +880,8 @@ namespace vynscastingmod
 
         private bool outdatedBuild = false;
         private VRRig disabledCosmeticsRig;
+
+        public List<(string, NametagObject)> tags = new List<(string, NametagObject)>(); // unused as of now, but might be usefull sooner or later
         
         #endregion
 

@@ -20,6 +20,8 @@ namespace vynscastingmod.Objects
 
         public void OnDestroy()
         {
+            textObj.text = "";
+            Destroy(textObj);
             Destroy(textObj.gameObject);
         }
 
@@ -27,10 +29,26 @@ namespace vynscastingmod.Objects
         {
             if (!Main.instance.nametagsEnabled)
             {
+                textObj.text = "";
+                Destroy(textObj);
+                Destroy(textObj.gameObject);
+                Destroy(this);
+                return;
+            }
+
+            try
+            {
+                if (!Main.instance.tags.Contains((this.attachedRig.Creator.UserId, this)))
+                    Main.instance.tags.Add((this.attachedRig.Creator.UserId, this));
+            }
+            catch (Exception) // if this fails, attachedRig is probably destroyed sooo yar
+            {
+                textObj.text = "";
+                Destroy(textObj);
                 Destroy(textObj.gameObject);
                 Destroy(this);
             }
-            
+
             textObj.font = Main.instance.loadedFont;
             textObj.transform.position = attachedRig.transform.position + (Vector3.up * 0.4f);
             textObj.transform.rotation = Main.instance.camera.transform.rotation;
