@@ -333,13 +333,16 @@ namespace vynscastingmod
             rotSmoothing = Math.Clamp(rotSmoothing, 0, 1);
             if (postSmoothing != smoothing) Notify($"Changed smoothing!\nMovement: {moveSmoothing}\nRotation: {rotSmoothing}");
             
-            float lastRiglerp = rigLerpingMultiplier;
-            if (Keyboard.current.commaKey.isPressed) rigLerpingMultiplier -= 0.5f * Time.deltaTime;
-            if (Keyboard.current.periodKey.isPressed) rigLerpingMultiplier += 0.5f * Time.deltaTime;
+            float lastRiglerp = rigLerpingMultiplierSlow;
+            if (Keyboard.current.commaKey.isPressed) rigLerpingMultiplierSlow -= 0.5f * Time.deltaTime;
+            if (Keyboard.current.periodKey.isPressed) rigLerpingMultiplierSlow += 0.5f * Time.deltaTime;
             
-            rigLerpingMultiplier = Math.Clamp(rigLerpingMultiplier, 1, 10);
+            if (Keyboard.current.nKey.isPressed) rigLerpingMultiplierFast -= 0.5f * Time.deltaTime;
+            if (Keyboard.current.mKey.isPressed) rigLerpingMultiplierFast += 0.5f * Time.deltaTime;
             
-            if(rigLerpingMultiplier != lastRiglerp) Notify($"Changed rig lerping!\nLerping: {rigLerpingMultiplier}");
+            rigLerpingMultiplierSlow = Math.Clamp(rigLerpingMultiplierSlow, 1, 10);
+            
+            if(rigLerpingMultiplierSlow != lastRiglerp) Notify($"Changed rig lerping!\nLerping: {rigLerpingMultiplierSlow}");
 
             float lastFov = camera.fieldOfView;
             if(Keyboard.current.semicolonKey.isPressed) camera.fieldOfView -= 5 * Time.deltaTime;
@@ -470,9 +473,19 @@ namespace vynscastingmod
         private void HandleRigModifiers()
         {
             float lerpDelta = Time.deltaTime * 120; //always gonna have 120fps-like lerping
-            
-            target.lerpValueBody = (0.155f * rigLerpingMultiplier) * lerpDelta;
-            target.lerpValueFingers = (0.155f * rigLerpingMultiplier) * lerpDelta;
+
+            Vector3 latestVel = target.LatestVelocity();
+            latestVel.y = 0;
+            if (latestVel.magnitude < 7)
+            {
+                target.lerpValueBody = (0.155f * rigLerpingMultiplierSlow) * lerpDelta;
+                target.lerpValueFingers = (0.155f * rigLerpingMultiplierSlow) * lerpDelta;
+            }
+            else
+            {
+                target.lerpValueBody = (0.155f * rigLerpingMultiplierFast) * lerpDelta;
+                target.lerpValueFingers = (0.155f * rigLerpingMultiplierFast) * lerpDelta;
+            }
 
             if (nametagsEnabled)
             {
@@ -765,7 +778,8 @@ namespace vynscastingmod
             labelText += "-= -> Decrease/Increase movement lerping\n";
             labelText += "[] -> Decrease/Increase rotation lerping\n";
             labelText += "F -> Reset Smoothing\n";
-            labelText += ",. -> Decrease/Increase rig lerping\n";
+            labelText += ",. -> Decrease/Increase rig lerping (under 7m/s)\n";
+            labelText += "NM -> Decrease/Increase rig lerping (over 7m/s)\n";
             labelText += ";' -> Decrease/Increase FOV\n";
             labelText += "V -> Push To Talk\n";
             labelText += "F1 -> Toggle Nametags\n";
@@ -793,7 +807,7 @@ namespace vynscastingmod
             labelText += $"Perspective: {perspective}\n";
             labelText += $"Move Lerping: {moveSmoothing}\n";
             labelText += $"Rot Lerping: {rotSmoothing}\n";
-            labelText += $"Rig Lerping: {rigLerpingMultiplier}\n";
+            labelText += $"Rig Lerping: {rigLerpingMultiplierSlow}\n";
             labelText += $"FOV: {camera.fieldOfView}\n";
             
             GUI.Label(new Rect(5,75, Screen.width-10, Screen.height-75), labelText);
@@ -815,7 +829,7 @@ namespace vynscastingmod
             
             cfg.WriteLine(moveSmoothing);
             cfg.WriteLine(rotSmoothing);
-            cfg.WriteLine(rigLerpingMultiplier);
+            cfg.WriteLine(rigLerpingMultiplierSlow);
             
             cfg.WriteLine(perspective);
             
@@ -833,6 +847,10 @@ namespace vynscastingmod
             cfg.WriteLine(camera.fieldOfView);
             
             cfg.WriteLine(firstPersonEnabled);
+            cfg.WriteLine(rigLerpingMultiplierFast);
+            
+            cfg.WriteLine(nametagFPS);
+            cfg.WriteLine(nametagPlat);
             
             cfg.Close();
         }
@@ -848,7 +866,7 @@ namespace vynscastingmod
             zOffset = float.Parse(setts[2]);
             moveSmoothing = float.Parse(setts[3]);
             rotSmoothing = float.Parse(setts[4]);
-            rigLerpingMultiplier = float.Parse(setts[5]);
+            rigLerpingMultiplierSlow = float.Parse(setts[5]);
             perspective = int.Parse(setts[6]);
             nameTagFont = int.Parse(setts[7]);
             loadedFont = loadedFonts[nameTagFont - 1];
@@ -872,6 +890,10 @@ namespace vynscastingmod
             
             camera.fieldOfView = float.Parse(setts[15]);
             firstPersonEnabled = bool.Parse(setts[16]);
+            rigLerpingMultiplierFast = float.Parse(setts[17]);
+            
+            nametagFPS = bool.Parse(setts[18]);
+            nametagPlat = bool.Parse(setts[19]);
         }
 
         #endregion
@@ -905,7 +927,7 @@ namespace vynscastingmod
         #region Setting variables
 
         private float xOffset = 0, yOffset = 0, zOffset = 0;
-        private float moveSmoothing = 0, rotSmoothing = 0, rigLerpingMultiplier = 1;
+        private float moveSmoothing = 0, rotSmoothing = 0, rigLerpingMultiplierSlow = 1, rigLerpingMultiplierFast = 1;
         private bool firstPersonEnabled = false, cosmeticsHidden = false;
 
         public bool nametagsEnabled = false, nametagFPS = true, nametagPlat = false;
