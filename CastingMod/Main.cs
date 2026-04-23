@@ -29,6 +29,22 @@ namespace vynscastingmod
     [BepInPlugin(modId, modName, modVer)]
     public class Main : BaseUnityPlugin
     {
+        
+        public bool invr;
+        private bool InVR() // steamvr check
+        {
+            try
+            {
+                invr = OpenVR.IsHmdPresent();
+            }
+            catch (Exception)
+            {
+                invr = false;
+            }
+            return invr;
+        }
+        
+        
         public const string modId = "com.vyn.castingClient";
         public const string modName = "vyn's casting mod";
         public const string modVer = "3.0.3";
@@ -53,14 +69,26 @@ namespace vynscastingmod
                 camera.farClipPlane = 2500;
                 camera.depth = Camera.main.depth + 1;
                 
+                if (InVR())
+                {
+                    
+                    fixedRenderMat = new Material(Shader.Find("Unlit/Texture"));
+                    
+                    cameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 67);
+                    
+                    camera.cameraType = CameraType.Preview;
+                    camera.targetTexture = cameraRenderTexture;
+                }
+                else
+                {
+                    UniversalAdditionalCameraData addCam = camera.AddComponent<UniversalAdditionalCameraData>();
                 
-                UniversalAdditionalCameraData addCam = camera.AddComponent<UniversalAdditionalCameraData>();
-                
-                addCam.requiresDepthTexture = false;
-                addCam.requiresColorTexture = false;
-                addCam.renderPostProcessing = false;
-                addCam.SetRenderer(0); 
-                addCam.renderType = CameraRenderType.Base;
+                    addCam.requiresDepthTexture = false;
+                    addCam.requiresColorTexture = false;
+                    addCam.renderPostProcessing = false;
+                    addCam.SetRenderer(0); 
+                    addCam.renderType = CameraRenderType.Base;
+                }
                 
                 Destroy(Camera.main.GetComponent<AudioListener>());
                 camera.AddComponent<AudioListener>();
@@ -752,6 +780,22 @@ namespace vynscastingmod
         {
             if (!initialized) return;
 
+            GUI.color = Color.white;
+            if (InVR())
+            {
+                cameraRenderTexture.width = Screen.width;
+                cameraRenderTexture.height = Screen.height;
+                
+                fixedRenderMat.SetTexture(Shader.PropertyToID("_MainTex"), cameraRenderTexture);
+
+                GUI.DrawTexture(
+                    new Rect(0, 0, Screen.width, Screen.height),
+                    cameraRenderTexture,
+                    0,
+                    false
+                );
+            }
+
             RenderOverlays();
 
             if (!isUiOpen) return;
@@ -959,6 +1003,8 @@ namespace vynscastingmod
 
         private bool outdatedBuild = false;
         private VRRig disabledCosmeticsRig;
+        private RenderTexture cameraRenderTexture;
+        private Material fixedRenderMat;
 
         public List<(string, NametagObject)> tags = new List<(string, NametagObject)>(); // unused as of now, but might be usefull sooner or later
         
