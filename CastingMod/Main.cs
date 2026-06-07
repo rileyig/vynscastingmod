@@ -51,14 +51,59 @@ namespace vynscastingmod
 
         public static Main instance;
         
+        // stupid mouse vars that im too lazy to scroll down for ported from weave
+        
+        private bool rightMouseDown;
+        private float pitch, yaw;
+        private Vector2 lastPos;
+        
+        // stupid mouse vars that im too lazy to scroll down for ported from weave
+        
+        
         public void LateUpdate() // Testing lateUpdate, should fix camera jittering.
         {
+            if (GTPlayer.Instance == null) return;
+            GTPlayer plr = GTPlayer.Instance;
+            
+            if (wasdToggled)
+            {
+                plr.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+
+                float speed = Time.deltaTime * 10;
+
+                if (Keyboard.current.wKey.isPressed) plr.transform.position += plr.bodyCollider.transform.forward * speed;
+                if (Keyboard.current.aKey.isPressed) plr.transform.position -= plr.bodyCollider.transform.right * speed;
+                if (Keyboard.current.sKey.isPressed) plr.transform.position -= plr.bodyCollider.transform.forward * speed;
+                if (Keyboard.current.dKey.isPressed) plr.transform.position += plr.bodyCollider.transform.right * speed;
+                if (Keyboard.current.eKey.isPressed || Keyboard.current.spaceKey.isPressed) plr.transform.position += Vector3.up * speed;
+                if (Keyboard.current.qKey.isPressed || Keyboard.current.leftCtrlKey.isPressed) plr.transform.position += Vector3.down * speed;
+                
+                if (Mouse.current.rightButton.isPressed)
+                {
+                    if (!rightMouseDown) lastPos = Mouse.current.position.value;
+
+                    Vector2 mouseDelta = Mouse.current.position.value - lastPos;
+
+                    yaw += mouseDelta.x * 0.1f;
+                    pitch -= mouseDelta.y * 0.1f;
+                }
+                
+                
+                plr.headCollider.transform.rotation = Quaternion.Euler(pitch, yaw, 0);
+                plr.bodyCollider.transform.rotation = Quaternion.Euler(pitch, yaw, 0);
+                Camera.main.transform.rotation = Quaternion.Euler(pitch, yaw, 0);
+                plr.headCollider.transform.rotation = Quaternion.Euler(pitch, yaw, 0);
+                
+                
+                lastPos = Mouse.current.position.value;
+                rightMouseDown = Mouse.current.rightButton.isPressed;
+            }else 
+                plr.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
+            
             if (!shouldInit) return;
             
             if (!initialized)
             {
-
-                if (GTPlayer.Instance == null) return;
                 offlineRig = GorillaTagger.Instance.offlineVRRig;
                 loadedRigs.Add(offlineRig);
                 
@@ -303,7 +348,8 @@ namespace vynscastingmod
         {
             if(Keyboard.current.escapeKey.wasPressedThisFrame) isUiOpen = !isUiOpen;
 
-            if (isUiOpen) return; // this was really annoying without.
+            if (wasdToggled) return; // this was really annoying without.
+            if (isTyping) return;
             
             if(Keyboard.current.vKey.wasPressedThisFrame)
             {
@@ -825,6 +871,7 @@ namespace vynscastingmod
             if (!shouldInit)
             {
                 if (GUI.Button(new Rect(5, 5, 200, 30), "Enable camera")) shouldInit = true;
+                if (GUI.Button(new Rect(5, 40, 200, 30), "Toggle WASD")) wasdToggled = !wasdToggled;
                 return;
             }
             if (!initialized) return;
@@ -851,15 +898,18 @@ namespace vynscastingmod
             RenderOverlays();
 
             if (!isUiOpen) return;
-
+            isTyping = GUI.GetNameOfFocusedControl() != "";
+            if (GUI.Button(new Rect(210, 5, 200, 30), "Toggle WASD")) wasdToggled = !wasdToggled;
+            GUI.SetNextControlName("RoomToJoin");
             roomToJoin = GUI.TextField(new Rect(5, 5, 200, 30), roomToJoin).ToUpper();
+            
             if (scoreOverlay != 0)
             {
-                team1Name = GUI.TextField(new Rect(210, 5, 200, 30), team1Name).ToUpper();
-                team2Name = GUI.TextField(new Rect(415, 5, 200, 30), team2Name).ToUpper();
-                
+                GUI.SetNextControlName("Team1Name");
+                team1Name = GUI.TextField(new Rect(415, 5, 200, 30), team1Name).ToUpper();
+                GUI.SetNextControlName("Team2Name");
+                team2Name = GUI.TextField(new Rect(620, 5, 200, 30), team2Name).ToUpper();
             }
-
             if (PhotonNetwork.InRoom)
             { 
                 if (GUI.Button(new Rect(5, 40, 200, 30), "Leave Room")) PhotonNetwork.Disconnect();
@@ -913,6 +963,45 @@ namespace vynscastingmod
             
             GUI.Label(new Rect(5,75, Screen.width-10, Screen.height-75), labelText);
             
+            
+            // CLICK GUI!!!!!!!!
+
+
+            int x = 400, y = 200;
+            bool shouldReset = false, shouldSave = false;
+            DrawCheckbox("Reset Offsets", ref shouldReset, x, ref y);
+            DrawCheckbox("Save Config", ref shouldSave, x, ref y);
+            if (shouldReset)
+            {
+                xOffset = 0;
+                yOffset = 0;
+                zOffset = 0;
+            }
+
+            if (shouldSave)
+            {
+                SaveConfig();
+            }
+            DrawSlider("X Offset: " + xOffset, ref xOffset, -3, 3, x, ref y);
+            DrawSlider("Y Offset: " + yOffset, ref yOffset, -3, 3, x, ref y);
+            DrawSlider("Z Offset: " + zOffset, ref zOffset, -3, 3, x, ref y);
+            float fov = camera.fieldOfView;
+            DrawSlider("FOV: " + fov, ref fov, 30, 160, x, ref y);
+            camera.fieldOfView = fov;
+            
+            y += 20;
+            
+            DrawSlider("Move Smoothing: " + moveSmoothing, ref moveSmoothing, 0, 1, x, ref y);
+            DrawSlider("Rot Smoothing: " + rotSmoothing, ref rotSmoothing, 0, 1, x, ref y);
+            
+            y += 20;
+            
+            DrawSlider("Slow rig Lerp: " + rigLerpingMultiplierSlow, ref rigLerpingMultiplierSlow, 1, 5, x, ref y);
+            DrawSlider("Flow rig Lerp: " + rigLerpingMultiplierFast, ref rigLerpingMultiplierFast, 1, 5, x, ref y);
+            
+            // CLICK GUI!!!!!!!!
+            
+            
             if (GUI.Button(new Rect(210, 40, 200, 30), "Round all vars"))
             {
                 xOffset *= 5;
@@ -948,9 +1037,24 @@ namespace vynscastingmod
                 
                 camera.fieldOfView = (float)Math.Round(camera.fieldOfView, 1);
             }
-            
-            // gonna add team name inputs when done with overlays
         }
+
+        private void DrawCheckbox(string message, ref bool var, int x, ref int y)
+        {
+            if (GUI.Button(new Rect(x, y, 20, 20), "")) var = !var;
+            GUI.Label(new Rect(x+25, y, 670, 20), message);
+
+            y += 22;
+        }
+
+        private void DrawSlider(string message, ref float var, float min, float max, int x, ref int y)
+        {
+            var = GUI.HorizontalSlider(new Rect(x, y+3, 200, 17), var, min, max);
+            GUI.Label(new Rect(x+205, y, 670, 20), message);
+
+            y += 22;
+        }
+        
         
         #endregion
 
@@ -1058,7 +1162,10 @@ namespace vynscastingmod
         private RenderTexture cameraRenderTexture;
         private Material fixedRenderMat;
 
-        public List<(string, NametagObject)> tags = new List<(string, NametagObject)>(); // unused as of now, but might be usefull sooner or later
+        private bool wasdToggled = false;
+        private bool isTyping = false;
+
+        public List<(string, NametagObject)> tags = new List<(string, NametagObject)>(); // unused as of now, but might be useful sooner or later
         
         #endregion
 
